@@ -50,7 +50,7 @@ function LogMood() {
                 notes: notes,
             };
             
-            await axios.post(`${API_BASE_URL}/api/moods/log`, payload); // Send to backend
+            const response = await axios.post(`${API_BASE_URL}/api/moods/log`, payload); // Send to backend
             
             // Success path: Set success message and navigate
             setMessage({ type: 'success', text: "Mood logged successfully! Redirecting..." });
