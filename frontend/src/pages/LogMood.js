@@ -61,15 +61,20 @@ function LogMood() {
             }, 1000); 
 
         } catch (err) {
-            // Failure path: Set error message
-            console.error("Mood logging error:", err);
-            setMessage({ 
-                type: 'error', 
-                text: "Failed to log mood. Check server connection and try again." 
-            });
-            setIsLoading(false); // Stop loading immediately on error
+    // Failure path: Set error message
+    console.error("Mood logging error:", err);
 
-        } finally {
+    // Use response from backend if available, otherwise fallback message
+    const errorMsg = err.response?.data?.message || err.message || 
+                     'Failed to log mood. Check server connection and try again.';
+
+    setMessage({ type: 'error', text: errorMsg });
+
+    // Optional: log status and data for debugging
+    console.log('[v0] Error:', err.response?.status, err.response?.data);
+
+    setIsLoading(false); // Stop loading immediately on error
+} finally {
             // Your custom finally logic: Only stop loading if navigation didn't successfully start
             if (!message || message.type !== 'success') {
                 setIsLoading(false); 
