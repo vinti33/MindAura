@@ -91,12 +91,13 @@
 // });
 
 // server.js
-const express = require("express");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const authRoutes = require("./routes/auth");
-const moodRoutes = require("./routes/moods");
+// server.js
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import mongoose from "mongoose";
+import authRoutes from "./routes/auth.js";
+import moodRoutes from "./routes/moods.js";
 
 dotenv.config();
 
@@ -105,7 +106,7 @@ const app = express();
 // Middleware
 // Allow frontend to access backend (replace with your frontend URL in production)
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "*", 
+    origin: process.env.FRONTEND_URL || "*",
     credentials: true
 }));
 app.use(express.json());
@@ -117,10 +118,7 @@ app.use("/api/moods", moodRoutes);
 // MongoDB connection
 const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        await mongoose.connect(process.env.MONGO_URI);
         console.log("MongoDB Connected");
     } catch (err) {
         console.error("MongoDB connection error:", err);
