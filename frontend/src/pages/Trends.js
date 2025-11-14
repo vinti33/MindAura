@@ -88,8 +88,8 @@ function Trends() {
                     <span className="rainbow-icon">🌈</span> Recent Mood Timeline
                 </h2>
                 <div className="mood-timeline">
-                    {moods?.map((m, index) => (
-                        <MoodTimelineItem key={index} moodEntry={m} index={index} />
+                    {moods?.slice().reverse().map((m, index) => (
+    <MoodTimelineItem key={index} moodEntry={m} index={index} />
                     ))}
                     {moods?.length === 0 && <p className="no-data-msg">Log your first mood to see the timeline!</p>}
                 </div>

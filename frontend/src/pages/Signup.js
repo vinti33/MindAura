@@ -30,7 +30,7 @@ function Signup() {
 
     try {
       // Call backend API to create user
-      const res = await axios.post(`${API_BASE_URL}/api/auth/login`, user);
+      const res = await axios.post(`${API_BASE_URL}/api/auth/signup`, user);
 
       setMessage(res.data.message || "Signup successful!");
 

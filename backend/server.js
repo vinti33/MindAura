@@ -98,6 +98,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
 import authRoutes from "./routes/auth.js";
+import aiRoutes from "./routes/aiRoutes.js";
+
 
 dotenv.config();
 
@@ -114,6 +116,7 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/moods", moodRoutes);
+app.use("/api/ai", aiRoutes);   //
 
 // MongoDB connection
 const connectDB = async () => {
