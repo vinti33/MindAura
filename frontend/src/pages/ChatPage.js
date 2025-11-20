@@ -21,9 +21,15 @@ function ChatPage() {
     setInput(""); // clear input
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/ai/ask`, {
-        message: input,
-      });
+      const res = await axios.post(
+        `${API_BASE_URL}/api/ai/ask`,
+        { message: input },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  }
+);
 
       const aiMsg = { role: "ai", content: res.data.reply };
 

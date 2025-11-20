@@ -10,7 +10,7 @@ export const logMood = async (req, res) => {
     }
 
     const newMood = new Mood({
-      user: req.user.id,   // ✅ changed from userId → user
+      user: req.user.id,
       mood,
       date: new Date(),
     });
@@ -23,30 +23,111 @@ export const logMood = async (req, res) => {
   }
 };
 
-// Get mood trends
+// Fetch mood trends
 export const getUserMoodTrends = async (req, res) => {
   try {
-    // ✅ changed from userId → user
-    const moods = await Mood.find({ user: req.user.id }).sort({ date: 1 });
+    const rawMoods = await Mood.find({ user: req.user.id }).sort({ date: -1 });
 
-    // Calculate streak
-    let longestStreak = 0, currentStreak = 0;
-    let prevDate = null;
+    if (!rawMoods.length) {
+      return res.status(200).json({
+        totalEntries: 0,
+        longestStreak: 0,
+        mostCommonMood: "None",
+        mostCommonMoodToday: "None",
+        moods: [],
+      });
+    }
 
-    moods.forEach((m) => {
-      const moodDate = new Date(m.date);
-      if (prevDate) {
-        const diff = (moodDate - prevDate) / (1000 * 60 * 60 * 24);
-        if (diff <= 1.5) currentStreak++;
-        else currentStreak = 1;
-      } else currentStreak = 1;
-      prevDate = moodDate;
-      longestStreak = Math.max(longestStreak, currentStreak);
+    // Filter daily moods → Keep last mood of each day
+    const filteredDailyMoods = [];
+    let seenDates = new Set();
+    rawMoods.forEach((m) => {
+      const day = m.date.toString().split("T")[0];
+      if (!seenDates.has(day)) {
+        filteredDailyMoods.push(m);
+        seenDates.add(day);
+      }
     });
 
-    res.status(200).json({ moods, longestStreak });
+    // Total entries (unique days logged)
+    const totalEntries = filteredDailyMoods.length;
+
+    // Streak calculation
+    let longestStreak = 1;
+    let currentStreak = 1;
+    for (let i = 1; i < filteredDailyMoods.length; i++) {
+      const prev = new Date(filteredDailyMoods[i - 1].date);
+      const curr = new Date(filteredDailyMoods[i].date);
+
+      const diffDays =
+        (prev.setHours(0, 0, 0, 0) - curr.setHours(0, 0, 0, 0)) /
+        (1000 * 60 * 60 * 24);
+
+      if (diffDays === 1) {
+        currentStreak++;
+      } else {
+        currentStreak = 1;
+      }
+      longestStreak = Math.max(longestStreak, currentStreak);
+    }
+
+    // Most common mood overall
+    const countMood = {};
+    rawMoods.forEach((m) => {
+      countMood[m.mood] = (countMood[m.mood] || 0) + 1;
+    });
+    const mostCommonMood = Object.keys(countMood).reduce((a, b) =>
+      countMood[a] > countMood[b] ? a : b
+    );
+
+    // Most common mood today
+    const today = new Date().toISOString().split("T")[0];
+    const todaysMoods = rawMoods.filter(
+      (m) => m.date.toString().split("T")[0] === today
+    );
+
+    let mostCommonMoodToday = "None";
+    if (todaysMoods.length) {
+      const countToday = {};
+      todaysMoods.forEach(
+        (m) => (countToday[m.mood] = (countToday[m.mood] || 0) + 1)
+      );
+      mostCommonMoodToday = Object.keys(countToday).reduce((a, b) =>
+        countToday[a] > countToday[b] ? a : b
+      );
+    }
+
+    return res.status(200).json({
+      totalEntries: rawMoods.length,
+      longestStreak,
+      mostCommonMood,
+      mostCommonMoodToday,
+      moods: rawMoods,
+    });
   } catch (error) {
     console.error("Error fetching mood trends:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Fetch today's most recent mood
+export const getTodayMoodStats = async (req, res) => {
+  try {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const moods = await Mood.find({ user: req.user.id }).sort({ date: -1 });
+
+    const todaysMoods = moods.filter(
+      (m) => m.date.toISOString().split("T")[0] === today
+    );
+
+    if (!todaysMoods.length) {
+      return res.status(200).json({ message: "No mood logged today", mood: null });
+    }
+
+    const latestMood = todaysMoods[0]; // Most recent today
+    return res.status(200).json({ mood: latestMood });
+  } catch (error) {
+    console.error("Error fetching today's mood:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -50,8 +50,16 @@ function LogMood() {
                 notes: notes,
             };
             
-            const response = await axios.post(`${API_BASE_URL}/api/moods/log`, payload); // Send to backend
-            
+             // Send to backend
+            const response = await axios.post(
+    `${API_BASE_URL}/api/moods/log`,
+    payload,
+    {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+        }
+    }
+);
             // Success path: Set success message and navigate
             setMessage({ type: 'success', text: "Mood logged successfully! Redirecting..." });
             

@@ -29,11 +29,19 @@ function Signup() {
     }
 
     try {
+
+      // DEBUG: Check the API URL and user data
+    console.log("API URL:", `${API_BASE_URL}/api/auth/signup`);
+    console.log("User data being sent:", user);
       // Call backend API to create user
       const res = await axios.post(`${API_BASE_URL}/api/auth/signup`, user);
 
       setMessage(res.data.message || "Signup successful!");
 
+      // Store token returned from backend
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
       // Redirect to Dashboard (or Login page depending on flow)
       navigate("/dashboard"); // After signup, go directly to dashboard
 

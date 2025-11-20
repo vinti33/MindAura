@@ -29,7 +29,7 @@ function Login() {
 
       // Optionally, store token or user data in localStorage
       // localStorage.setItem("token", res.data.token);
-
+      localStorage.setItem("token", res.data.token);
       // Redirect to Dashboard
       navigate("/dashboard");
 

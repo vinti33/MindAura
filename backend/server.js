@@ -88,7 +88,7 @@
 // const PORT = process.env.PORT || 5000;
 // app.listen(PORT, () => {
 //     console.log(`Server running on http://localhost:${PORT}`);
-// });
+// }); 
 
 // server.js
 // server.js
@@ -102,14 +102,24 @@ import aiRoutes from "./routes/aiRoutes.js";
 
 
 dotenv.config();
-
+console.log(process.env.JWT_SECRET)
 const app = express();
 
-// Middleware
+const allowedOrigins = [
+  process.env.FRONTEND_URL, // production URL
+  "http://localhost:3000",  // local development
+];
+
 // Allow frontend to access backend (replace with your frontend URL in production)
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "*",
-    credentials: true
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true); // allow Postman or curl
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error(`CORS error: ${origin} not allowed`), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
 }));
 app.use(express.json());
 

@@ -43,7 +43,11 @@ function Trends() {
         const fetchTrends = async () => {
             try {
                 // Assuming you've fixed the auth error or removed the header for testing
-                const res = await axios.get(`${API_BASE_URL}/api/moods/trends`); 
+                const res = await axios.get(`${API_BASE_URL}/api/moods/trends`, {
+    headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
+});
                 
                 // Use default data structure if backend returns empty for initial safety
                 const data = res.data || {
